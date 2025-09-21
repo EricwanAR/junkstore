@@ -240,6 +240,19 @@
           "EnumValues": []
         },
         {
+          "Key": "SET_STEAM_COMPAT_LIBRARY_PATHS",
+          "Label": "Set Steam Compatibility Library Paths",
+          "Description": "Sets the library paths for Steam compatibility",
+          "DefaultValue": "true",
+          "Value": "true",
+          "Type": "Boolean",
+          "Min": 0,
+          "Max": 0,
+          "ModeLevel": 2,
+          "Parents": [],
+          "EnumValues": []
+        },
+        {
           "Key": "GAMESCOPE_HACK",
           "Label": "Hack to show windows that are hidden by gamescope",
           "Description": "This for games that run in the background like pumpkin jack",
