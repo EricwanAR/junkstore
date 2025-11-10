@@ -26,7 +26,7 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
     const showDeveloperMode = (show: boolean) => {
         setIsDeveloperMode(show)
         localStorage.setItem('js_developermode', show.toString())
-        if(show)
+        if (show)
             addAchievement('MTA=')
     }
 
@@ -42,6 +42,12 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
         addAchievement('MTAw')
     };
     const socialLinks = [
+        {
+            label: "Need help or want to upgrade? Visit our website",
+            icon: <SiDiscord />,
+            link: "https://www.junkstore.xyz",
+            buttonText: "Visit",
+        },
         {
             label: "Discord",
             icon: <SiDiscord />,
@@ -71,12 +77,6 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
             icon: <SiGithub />,
             link: "https://github.com/ebenbruyns/junkstore",
             buttonText: "Report issues",
-        },
-        {
-            label: "Junk-Store Wiki",
-            icon: <FaQuestion />,
-            link: "https://wiki.junkstore.xyz/wiki/Main_Page",
-            buttonText: "Wiki",
         },
         {
             label: "Reddit Community",
@@ -360,9 +360,9 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                                             <br />
                                             See the links Tab for more information on how you can support me.
                                         </div>
-                                    
-                                
-                                        </ScrollableWindowRelative>
+
+
+                                    </ScrollableWindowRelative>
                                 </div>
                             </div>
                         </>
@@ -370,56 +370,56 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                     {
                         title: "Links",
                         content: <Focusable style={{ display: "flex", flexDirection: "column" }}>
-                        {socialLinks.map((linkInfo, index) => (
-                            <Field
-                                key={index}
-                                label={linkInfo.label}
-                                icon={linkInfo.icon}
-                                bottomSeparator={"none"}
-                                padding={"none"}
-                                indentLevel={1}
-                            >
-                                <Focusable
-                                    style={{
-                                        marginLeft: "auto",
-                                        boxShadow: "none",
-                                        display: "flex",
-                                        justifyContent: "right",
-                                        padding: "4px",
-                                    }}
+                            {socialLinks.map((linkInfo, index) => (
+                                <Field
+                                    key={index}
+                                    label={linkInfo.label}
+                                    icon={linkInfo.icon}
+                                    bottomSeparator={"none"}
+                                    padding={"none"}
+                                    indentLevel={1}
                                 >
-                                    <DialogButton
-                                        onClick={() => {
-                                            Navigation.NavigateToExternalWeb(linkInfo.link);
-                                            addAchievement("MTAxMA==")
-                                        }}
+                                    <Focusable
                                         style={{
-                                            padding: "10px",
-                                            fontSize: "14px",
-                                        }}
-                                    >
-                                        {linkInfo.buttonText}
-                                    </DialogButton>
-                                    <DialogButton
-                                        onClick={() => {
-                                            showQrModal(linkInfo.link);
-                                        }}
-                                        style={{
+                                            marginLeft: "auto",
+                                            boxShadow: "none",
                                             display: "flex",
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                            padding: "10px",
-                                            maxWidth: "40px",
-                                            minWidth: "auto",
-                                            marginLeft: ".5em",
+                                            justifyContent: "right",
+                                            padding: "4px",
                                         }}
                                     >
-                                        <HiOutlineQrCode />
-                                    </DialogButton>
-                                </Focusable>
-                            </Field>
-                        ))}
-                            </Focusable>
+                                        <DialogButton
+                                            onClick={() => {
+                                                Navigation.NavigateToExternalWeb(linkInfo.link);
+                                                addAchievement("MTAxMA==")
+                                            }}
+                                            style={{
+                                                padding: "10px",
+                                                fontSize: "14px",
+                                            }}
+                                        >
+                                            {linkInfo.buttonText}
+                                        </DialogButton>
+                                        <DialogButton
+                                            onClick={() => {
+                                                showQrModal(linkInfo.link);
+                                            }}
+                                            style={{
+                                                display: "flex",
+                                                justifyContent: "center",
+                                                alignItems: "center",
+                                                padding: "10px",
+                                                maxWidth: "40px",
+                                                minWidth: "auto",
+                                                marginLeft: ".5em",
+                                            }}
+                                        >
+                                            <HiOutlineQrCode />
+                                        </DialogButton>
+                                    </Focusable>
+                                </Field>
+                            ))}
+                        </Focusable>
                     },
 
 
@@ -430,9 +430,9 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                     {
                         title: "Achievements",
                         visible: hasAchievements(),
-                        content: 
+                        content:
                             <Achievements serverAPI={serverAPI} />
-                           
+
                     },
                     {
                         title: "Developer",
