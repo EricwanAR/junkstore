@@ -11,10 +11,11 @@ const exeRunnerRootClass = 'exe-runner-modal-root';
 export interface ExeRunnerProperties extends EditorProperties {
     shortName: string;
     onExeExit: () => void;
+    closeParent?: () => void;
 }
 
 export const ExeRunner: VFC<ExeRunnerProperties> = ({
-    serverAPI, initActionSet, initAction, contentId, closeModal, shortName, refreshParent, onExeExit
+    serverAPI, initActionSet, initAction, contentId, closeModal, shortName, refreshParent, onExeExit, closeParent
 }) => {
     const logger = new Logger("ExeRunner");
     const [actionSetName, setActionSetName] = useState("" as string);
@@ -118,6 +119,7 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
 
                         const gameExe = file.Path.startsWith(startDir) ? file.Path.substring(startDir.length + 1) : file.Path;
                         const gameId = gameIDFromAppID(parseInt(contentId));
+                        closeParent && closeParent();
                         const result = await executeAction<ExecuteRunBinaryArgs, SaveRefresh>(
                             serverAPI,
                             actionSetName,

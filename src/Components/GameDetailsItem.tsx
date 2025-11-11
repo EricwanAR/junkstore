@@ -35,7 +35,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
     logger.log("GameDetailsItem shouldUpdateshortcut", shouldUpdateShortcut);
 
     const originRoute = location.pathname.replace('/routes', '');
-   // useEffect(() => reaction(() => SteamUIStore.WindowStore.GamepadUIMainWindowInstance?.LocationPathName, closeModal), []);
+    // useEffect(() => reaction(() => SteamUIStore.WindowStore.GamepadUIMainWindowInstance?.LocationPathName, closeModal), []);
 
     const [progress, setProgress] = useState<ProgressUpdate>({
         Percentage: 0,
@@ -152,7 +152,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
         }
     };
 
-   
+
 
     useEffect(() => {
         if (installing) {
@@ -442,7 +442,10 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
                             uninstaller={uninstall}
                             editors={(gameData.Content as GameDetails).Editors}
                             initActionSet={initActionSet}
-                            runner={() => runApp(parseInt(steamClientID), onExeExit)}
+                        runner={() => {
+                                closeModal && closeModal();
+                                runApp(parseInt(steamClientID), onExeExit)
+                            }}
                             actions={scriptActions}
                             resetLaunchOptions={resetLaunchOptions}
                             updater={() => download(true)}

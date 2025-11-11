@@ -106,7 +106,7 @@ const GameDisplay: VFC<GameDisplayProperties> = (
         showContextMenu(
             <Menu label="Actions" cancelText="Cancel" onCancel={() => { }}>
                 {isInstalled &&
-                    <MenuItem onSelected={() => showModal(<ExeRunner serverAPI={serverApi} initActionSet={initActionSet} initAction="GetExeActions" contentId={steamClientID} shortName={shortName} refreshParent={reloadData} onExeExit={onExeExit} />)}>
+                    <MenuItem onSelected={() => showModal(<ExeRunner serverAPI={serverApi} initActionSet={initActionSet} initAction="GetExeActions" contentId={steamClientID} shortName={shortName} refreshParent={reloadData} onExeExit={onExeExit} closeParent={closeModal} />)}>
                         Run exe in Game folder
                     </MenuItem>
                 }
@@ -183,7 +183,10 @@ const GameDisplay: VFC<GameDisplayProperties> = (
 
     const focusableProps: FooterLegendProps = !isInstalled ? {} :
         {
-            onOptionsButton: () => Navigation.Navigate(`/library/app/${steamClientID}`),
+            onOptionsButton: () => {
+                closeModal && closeModal();
+                Navigation.Navigate(`/library/app/${steamClientID}`)
+            },
             onOptionsActionDescription: 'Go to Steam App Page'
         };
 
