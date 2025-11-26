@@ -54,7 +54,7 @@ if [[ "${RUNTIMES_VKD3D_PROTON}" == "true" ]]; then
 else
     export PROTON_USE_WINED3D11=0
 fi
-if [[ "RUNTIMES_FSR" == "true" ]]; then
+if [[ "${RUNTIMES_FSR}" == "true" ]]; then
     export WINE_FULLSCREEN_FSR=1
 else
     export WINE_FULLSCREEN_FSR=0
@@ -101,9 +101,9 @@ else
 fi
 
 
-CMD=${*:q}
+CMD=${*}
 
-echo "CMD: ${CMD:q}"
+echo "CMD: ${CMD}"
 
 
 sync-saves
@@ -113,31 +113,34 @@ QUOTED_ARGS=""
 ALL_BUT_LAST_ARG=""
 REG_FIX=""
 for arg in "$@"; do
-    QUOTED_ARGS+=" \"${arg:q}\"" 
+    QUOTED_ARGS+=" \"${arg}\"" 
     if [[ "${arg}" != "${!#}" ]]; then
-        ALL_BUT_LAST_ARG+=" \"${arg:q}\""
-        REG_FIX+=" \"${arg:q}\""
+        ALL_BUT_LAST_ARG+=" \"${arg}\""
+        REG_FIX+=" \"${arg}\""
     else
         ALL_BUT_LAST_ARG+=" \"install_deps.bat\""
     fi
 done
 
-ARGS=$("${ARGS_SCRIPT}" $ID)
+ARGS=""
+if [[ -f "${ARGS_SCRIPT}" ]]; then
+    ARGS=$("${ARGS_SCRIPT}" "$ID")
+fi
 if [[ "${ADVANCED_IGNORE_EPIC_ARGS}" == "true" ]]; then
     ARGS="${ADVANCED_ARGUMENTS}"
 else
-    ARGS="${ARGS:q} ${ADVANCED_ARGUMENTS}"
+    ARGS="${ARGS} ${ADVANCED_ARGUMENTS}"
 fi
 
 
 echo "ARGS: ${ARGS}" &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 for arg in $ARGS; do
-    QUOTED_ARGS+=" ${arg:q}" 
+    QUOTED_ARGS+=" ${arg}" 
     
 done
 
 pushd "${DECKY_PLUGIN_DIR}"
-GAME_PATH=$($EPICCONF --get-game-dir $ID --dbfile $DBFILE --offline)
+GAME_PATH=$($EPICCONF --get-game-dir "$ID" --dbfile $DBFILE --offline)
 popd
 echo "game path: ${GAME_PATH}" &> "${GAME_PATH}/launcher.log"
 
@@ -149,9 +152,9 @@ else
     echo "installing deps" &>> "${GAME_PATH}/launcher.log"
     echo "install_deps.bat does not exist"
     pwd &>> "${GAME_PATH}/launcher.log"
-    echo "`echo -e \"${REG_FIX} reg add HKEY_CLASSES_ROOT\\\\\\\\\\\\\\\\com.epicgames.launcher /f\"`" &>> "${GAME_PATH}/launcher.log" &>> "${GAME_PATH}/launcher.log"
+    echo "$(echo -e "${REG_FIX} reg add HKEY_CLASSES_ROOT\\\\\\\\\\\\\\\\com.epicgames.launcher /f")" &>> "${GAME_PATH}/launcher.log"
   
-    eval "`echo -e \"${REG_FIX} reg add HKEY_CLASSES_ROOT\\\\\\\\\\\\\\\\com.epicgames.launcher /f"`" &>> "${GAME_PATH}/launcher.log"
+    eval "$(echo -e "${REG_FIX} reg add HKEY_CLASSES_ROOT\\\\\\\\\\\\\\\\com.epicgames.launcher /f")" &>> "${GAME_PATH}/launcher.log"
    
     echo "EpicOnlineServices\\EpicOnlineServicesInstaller.exe" > "${GAME_PATH}/install_deps.bat"
     echo "echo \"install done\" > install.done" >> "${GAME_PATH}/install_deps.bat"
@@ -161,23 +164,23 @@ else
     pushd "${GAME_PATH}"
   
     echo "path: ${GAME_PATH}" &>> "${GAME_PATH}/launcher.log"
-    echo "`echo -e $ALL_BUT_LAST_ARG`" &>> "${GAME_PATH}/launcher.log"
-    eval "`echo -e $ALL_BUT_LAST_ARG`"  # &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
+    echo "$(echo -e "$ALL_BUT_LAST_ARG")" &>> "${GAME_PATH}/launcher.log"
+    eval "$(echo -e "$ALL_BUT_LAST_ARG")"  # &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
     popd
 fi
 
 echo -e "Running: ${QUOTED_ARGS}" >> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 
 export STORE="egs"
-export UMU_ID=$($EPICCONF --get-umu-id $ID --dbfile $DBFILE)
+export UMU_ID=$($EPICCONF --get-umu-id "$ID" --dbfile $DBFILE)
 export STEAM_COMPAT_INSTALL_PATH=${GAME_PATH}
 if [[ "${ADVANCED_SET_STEAM_COMPAT_LIBRARY_PATHS}" == "true" ]]; then
     export STEAM_COMPAT_LIBRARY_PATHS=${STEAM_COMPAT_LIBRARY_PATHS}:${GAME_PATH}
 fi
 export PROTON_SET_GAME_DRIVE="gamedrive"
 
-eval "`echo -e ${ADVANCED_VARIABLES}`" &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
-eval "`echo -e $QUOTED_ARGS`"  &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
+eval "$(echo -e "${ADVANCED_VARIABLES}")" &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
+eval "$(echo -e "$QUOTED_ARGS")"  &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 # eval "${CMD:q} ${ARGS}"  &> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 
 sync-saves

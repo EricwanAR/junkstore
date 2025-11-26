@@ -199,7 +199,7 @@ class Epic(GamesDb.GamesDb):
             result = self.execute_shell(
             f"{self.legendary_cmd} launch {game_id} --json --skip-version-check {offline_switch} ")
             args = result['game_parameters']
-            epic_args = result['epic_parameters']
+            epic_args = result['egl_parameters']
             all_args = args + epic_args
             return " ".join(all_args)
         except CmdException as e:
