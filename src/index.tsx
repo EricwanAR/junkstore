@@ -10,9 +10,11 @@ import { FaBoxOpen } from "react-icons/fa";
 
 import { Content } from "./ContentTabs";
 import { About } from "./About";
+import { News } from "./News";
 import { addAchievement, getAchievementDetails, toastAchievement, toastFactory } from "./Utils/achievements";
 import Logger from "./Utils/logger";
 import { MainMenuModal } from "./MainMenuModal";
+import { getNewItemsSinceLastCheck, updateLastCheckTimestamp, NewsItem } from "./Utils/newsTracking";
 
 
 
@@ -68,6 +70,42 @@ export default definePlugin((serverApi: ServerAPI) => {
   if (currentDay === 5 && currentMonth === 13) {
     addAchievement("MTEw")
   }
+
+  const checkForNewNews = async () => {
+    try {
+      const result = await serverApi.callPluginMethod<
+        { url: string; excluded_categories: string[] },
+        { items: NewsItem[] }
+      >("fetch_rss_feed", {
+        url: "https://www.junkstore.xyz/feed.xml",
+        excluded_categories: [],
+      });
+
+      if (result.success && result.result) {
+        const newItems = getNewItemsSinceLastCheck(result.result.items);
+        
+        if (newItems.length > 0) {
+          serverApi.toaster.toast({
+            title: "Junk Store News",
+            body: `${newItems.length} new article${newItems.length > 1 ? 's' : ''} available!`,
+            duration: 8000,
+            onClick: () => {
+              Navigation.Navigate("/junk-store-news");
+            },
+          });
+        }
+        
+        updateLastCheckTimestamp();
+      }
+    } catch (err) {
+      console.error("Error checking for new news:", err);
+    }
+  };
+
+  checkForNewNews();
+
+  const newsCheckInterval = setInterval(checkForNewNews, 60 * 60 * 1000);
+
   serverApi.routerHook.addRoute(
     "/junk-store-content/:initActionSet/:initAction",
     () => {
@@ -87,6 +125,15 @@ export default definePlugin((serverApi: ServerAPI) => {
       exact: true,
     }
   );
+  serverApi.routerHook.addRoute(
+    "/junk-store-news",
+    () => {
+      return <News serverAPI={serverApi} />
+    },
+    {
+      exact: true,
+    }
+  );
 
 
 
@@ -98,7 +145,9 @@ export default definePlugin((serverApi: ServerAPI) => {
     onDismount() {
       serverApi.routerHook.removeRoute("/junk-store-content/:initActionSet/:initAction");
       serverApi.routerHook.removeRoute("/about-junk-store");
+      serverApi.routerHook.removeRoute("/junk-store-news");
       unregister.unregister();
+      clearInterval(newsCheckInterval);
     },
   };
 });
