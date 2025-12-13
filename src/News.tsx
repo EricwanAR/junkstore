@@ -83,7 +83,13 @@ export const News: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
 
     return (
         <DialogBody>
-
+            <Focusable
+                onOptionsButton={() => {
+                    logger.debug("Refetching RSS feed...");
+                    loadFeed();
+                }}
+                onOptionsActionDescription="Refresh Feed"
+            >
             <DialogControlsSection>
 
                 {loading && (
@@ -200,24 +206,7 @@ export const News: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                                         {stripHtml(item.description)}
                                     </div>
 
-                                    <div style={{
-                                        fontSize: '12px',
-                                        opacity: 0.7,
-                                        marginTop: '8px',
-                                        fontStyle: 'italic',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        gap: '4px'
-                                    }}>
-                                        {item.link && (
-                                            <div style={{ color: '#1a73e8' }}>
-                                                Press A to read more →
-                                            </div>
-                                        )}
-                                        <div>
-                                            Press X to mark as {isRead ? 'unread' : 'read'}
-                                        </div>
-                                    </div>
+
                                 </Focusable>
                             );
                         })}
@@ -225,6 +214,7 @@ export const News: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
 
                 )}
             </DialogControlsSection>
+            </Focusable>
         </DialogBody>
     );
 };
