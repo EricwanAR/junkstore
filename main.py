@@ -378,6 +378,50 @@ class Helper:
             Helper.wsServerIsRunning = False
             decky_plugin.logger.info("WebSocket server stopped")
 
+    @staticmethod
+    def get_installed_extensions():
+        """
+        Get list of installed extension directory names by checking for static.json files
+        Searches in both plugin dir and runtime dir (data)
+        Returns a list of unique extension names (directory names containing static.json)
+        """
+        extensions = set()
+
+        # Search paths
+        search_paths = [
+            os.path.join(decky_plugin.DECKY_PLUGIN_DIR, "scripts", "Extensions"),
+            os.path.join(
+                decky_plugin.DECKY_PLUGIN_RUNTIME_DIR, "scripts", "Extensions"
+            ),
+        ]
+
+        for base_path in search_paths:
+            if not os.path.exists(base_path):
+                continue
+
+            try:
+                # Walk through the Extensions directory
+                for root, dirs, files in os.walk(base_path):
+                    # If this directory contains static.json
+                    if "static.json" in files:
+                        # Get the directory name relative to Extensions
+                        rel_path = os.path.relpath(root, base_path)
+                        # If it's directly under Extensions (not the Extensions dir itself)
+                        if rel_path != ".":
+                            # Get just the top-level directory name
+                            ext_name = rel_path.split(os.sep)[0]
+                            extensions.add(ext_name)
+
+            except Exception as e:
+                decky_plugin.logger.error(
+                    f"Error scanning extensions in {base_path}: {e}"
+                )
+
+        # Convert to sorted list
+        result = sorted(list(extensions))
+        decky_plugin.logger.info(f"Found installed extensions: {result}")
+        return result
+
 
 # import requests
 
@@ -555,49 +599,6 @@ class Plugin:
 
         return log_files
 
-    async def get_installed_extensions(self):
-        """
-        Get list of installed extension directory names by checking for static.json files
-        Searches in both plugin dir and runtime dir (data)
-        Returns a list of unique extension names (directory names containing static.json)
-        """
-        extensions = set()
-
-        # Search paths
-        search_paths = [
-            os.path.join(decky_plugin.DECKY_PLUGIN_DIR, "scripts", "Extensions"),
-            os.path.join(
-                decky_plugin.DECKY_PLUGIN_RUNTIME_DIR, "scripts", "Extensions"
-            ),
-        ]
-
-        for base_path in search_paths:
-            if not os.path.exists(base_path):
-                continue
-
-            try:
-                # Walk through the Extensions directory
-                for root, dirs, files in os.walk(base_path):
-                    # If this directory contains static.json
-                    if "static.json" in files:
-                        # Get the directory name relative to Extensions
-                        rel_path = os.path.relpath(root, base_path)
-                        # If it's directly under Extensions (not the Extensions dir itself)
-                        if rel_path != ".":
-                            # Get just the top-level directory name
-                            ext_name = rel_path.split(os.sep)[0]
-                            extensions.add(ext_name)
-
-            except Exception as e:
-                decky_plugin.logger.error(
-                    f"Error scanning extensions in {base_path}: {e}"
-                )
-
-        # Convert to sorted list
-        result = sorted(list(extensions))
-        decky_plugin.logger.info(f"Found installed extensions: {result}")
-        return result
-
     async def fetch_rss_feed(
         self, url: str, excluded_categories: list = None, extensions: list = None
     ):
@@ -610,6 +611,8 @@ class Plugin:
             if excluded_categories is None:
                 excluded_categories = []
             if extensions is None:
+                extensions = Helper.get_installed_extensions()
+            if not extensions:
                 extensions = []
 
             decky_plugin.logger.info(f"Fetching RSS feed from: {url}")
