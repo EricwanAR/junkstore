@@ -143,7 +143,11 @@ pushd "${DECKY_PLUGIN_DIR}"
 GAME_PATH=$($EPICCONF --get-game-dir "$ID" --dbfile $DBFILE --offline)
 popd
 echo "game path: ${GAME_PATH}" &> "${GAME_PATH}/launcher.log"
-
+export STEAM_COMPAT_INSTALL_PATH=${GAME_PATH}
+if [[ "${ADVANCED_SET_STEAM_COMPAT_LIBRARY_PATHS}" == "true" ]]; then
+    export STEAM_COMPAT_LIBRARY_PATHS=${STEAM_COMPAT_LIBRARY_PATHS}:${GAME_PATH}
+fi
+export PROTON_SET_GAME_DRIVE="gamedrive"
 if [ -f "${GAME_PATH}/install.done" ]; then
     echo "install_deps.bat exists"
     echo "install_deps.bat exists" &>> "${GAME_PATH}/launcher.log"
@@ -152,11 +156,12 @@ else
     echo "installing deps" &>> "${GAME_PATH}/launcher.log"
     echo "install_deps.bat does not exist"
     pwd &>> "${GAME_PATH}/launcher.log"
-    echo "$(echo -e "${REG_FIX} reg add HKEY_CLASSES_ROOT\\\\\\\\\\\\\\\\com.epicgames.launcher /f")" &>> "${GAME_PATH}/launcher.log"
+    #echo "$(echo -e "${REG_FIX} reg add HKEY_CLASSES_ROOT\\\\\\\\\\\\\\\\com.epicgames.launcher /f")" &>> "${GAME_PATH}/launcher.log"
   
-    eval "$(echo -e "${REG_FIX} reg add HKEY_CLASSES_ROOT\\\\\\\\\\\\\\\\com.epicgames.launcher /f")" &>> "${GAME_PATH}/launcher.log"
+    echo "reg add HKEY_CLASSES_ROOT\\com.epicgames.launcher /f" > "${GAME_PATH}/install_deps.bat"
+    #eval "$(echo -e "${REG_FIX} reg add HKEY_CLASSES_ROOT\\\\\\\\\\\\\\\\com.epicgames.launcher /f")" &>> "${GAME_PATH}/launcher.log"
    
-    echo "EpicOnlineServices\\EpicOnlineServicesInstaller.exe" > "${GAME_PATH}/install_deps.bat"
+    echo "EpicOnlineServices\\EpicOnlineServicesInstaller.exe" >> "${GAME_PATH}/install_deps.bat"
     echo "echo \"install done\" > install.done" >> "${GAME_PATH}/install_deps.bat"
    
 
@@ -171,13 +176,18 @@ fi
 
 echo -e "Running: ${QUOTED_ARGS}" >> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 
-export STORE="egs"
-export UMU_ID=$($EPICCONF --get-umu-id "$ID" --dbfile $DBFILE)
-export STEAM_COMPAT_INSTALL_PATH=${GAME_PATH}
-if [[ "${ADVANCED_SET_STEAM_COMPAT_LIBRARY_PATHS}" == "true" ]]; then
-    export STEAM_COMPAT_LIBRARY_PATHS=${STEAM_COMPAT_LIBRARY_PATHS}:${GAME_PATH}
+UMU_ID=""
+
+if [[ "${EPIC_ENABLE_UMU_FIXES}" != "false" ]]; then
+    export STORE="egs"
+    UMU_ID=$($EPICCONF --get-umu-id "$ID" --dbfile $DBFILE)
+    export UMU_ID="${UMU_ID}"
 fi
-export PROTON_SET_GAME_DRIVE="gamedrive"
+
+if [[ "${UMU_ID}" == "" ]]; then
+    unset UMU_ID
+    unset STORE
+fi
 
 eval "$(echo -e "${ADVANCED_VARIABLES}")" &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 eval "$(echo -e "$QUOTED_ARGS")"  &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"

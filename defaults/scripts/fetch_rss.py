@@ -12,12 +12,36 @@ from urllib.request import urlopen
 from urllib.error import URLError, HTTPError
 
 
-def fetch_rss_feed(url, excluded_categories=None):
-
+def fetch_rss_feed(url, excluded_categories=None, extensions=None):
+ 
     if excluded_categories is None:
         excluded_categories = ["Marketing", "Sponsored", "Promotion", "Sale"]
+    if extensions is None:
+        extensions = []
 
     try:
+        from urllib.parse import urlencode, urlparse, parse_qs, urlunparse
+
+        parsed = urlparse(url)
+        query_params = parse_qs(parsed.query)
+        query_params["base"] = ["decky"]
+
+        if extensions:
+            unique_sorted_extensions = sorted(list(set(extensions)))
+            query_params["extensions"] = [",".join(unique_sorted_extensions)]
+
+        new_query = urlencode(query_params, doseq=True)
+        url = urlunparse(
+            (
+                parsed.scheme,
+                parsed.netloc,
+                parsed.path,
+                parsed.params,
+                new_query,
+                parsed.fragment,
+            )
+        )
+
         with urlopen(url, timeout=10) as response:
             content = response.read().decode("utf-8")
         root = ET.fromstring(content)
@@ -96,11 +120,13 @@ if __name__ == "__main__":
             args = json.loads(input_data)
             url = args.get("url", "https://www.junkstore.xyz/feed.xml")
             excluded_categories = args.get("excluded_categories", [])
+            extensions = args.get("extensions", [])
         else:
             url = "https://www.junkstore.xyz/feed.xml"
             excluded_categories = []
+            extensions = []
 
-        result = fetch_rss_feed(url, excluded_categories)
+        result = fetch_rss_feed(url, excluded_categories, extensions)
         print(json.dumps(result))
 
     except Exception as e:

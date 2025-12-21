@@ -132,7 +132,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
                     if (progressUpdate.Percentage >= 100) {
 
                         if (shouldUpdateShortcut) {
-                            install();
+                            await install();
                         }
                         else {
                             setInstalling(false);
@@ -157,7 +157,9 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
     useEffect(() => {
         if (installing) {
             logger.log("GameDetailsItem updateProgress");
-            updateProgress();
+            updateProgress().then(() => {
+                logger.log("GameDetailsItem updateProgress finished");
+            });
         }
     }, [installing]);
     const uninstall = async () => {
@@ -374,18 +376,16 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
         // if (gameData.Type !== "GameDetails") {
         //     return id;
         // }
-
         await appDetailsCache.FetchDataForApp(id)
         await appDetailsStore.RequestAppDetails(id);
-        await SteamClient.Apps.SetShortcutName(id, (gameData.Content as GameDetails).Name);
+        SteamClient.Apps.SetShortcutName(id, (gameData.Content as GameDetails).Name);
         return id;
         //    }
     };
     const install = async () => {
         try {
             const id = await getSteamId();
-            configureShortcut(id);
-
+            await configureShortcut(id);
         } catch (error) {
             logger.error(error);
         }

@@ -138,10 +138,7 @@ class GameSet:
         c.execute("SELECT UmuId FROM Game WHERE ShortName=?", (shortname,))
         result = c.fetchone()
         conn.close()
-        if result:
-            return result[0]
-        else:
-            return None
+        return result[0] if result and result[0] else ""
     
     def update_umu_id(self, shortname, store):
         url = "https://umu.openwinecomponents.org/umu_api.php?codename=" + shortname + "&store=" + store
