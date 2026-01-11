@@ -189,6 +189,17 @@ if [[ "${UMU_ID}" == "" ]]; then
     unset STORE
 fi
 
+if [ -f "$HOME/.local/lib/liblsfg-vk.so" ]; then
+    if [[ "${DISABLE_LSFGVK}" != "1" && "${DISABLE_LSFGVK}" != "true" ]]; then
+        export LD_PRELOAD="$HOME/.local/lib/:${LD_PRELOAD}"
+        echo "LSFG-VK enabled" &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
+    else
+        echo "LSFG-VK disabled for this game" &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
+    fi
+else
+    echo "LSFG-VK not installed" &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
+fi
+
 eval "$(echo -e "${ADVANCED_VARIABLES}")" &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 eval "$(echo -e "$QUOTED_ARGS")"  &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 # eval "${CMD:q} ${ARGS}"  &> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
