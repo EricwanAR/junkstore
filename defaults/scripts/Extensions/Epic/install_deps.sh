@@ -16,8 +16,10 @@ function uninstall() {
 
 function download_and_install() {
     cd /tmp
-    if ! flatpak remotes --columns=name | grep -qx "flathub"; then
-        flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+    flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+    SYS_URL=$(flatpak remotes --system --columns=name,url | awk '$1=="flathub"{print $2}')
+    if [ -n "$SYS_URL" ]; then
+        flatpak remote-modify --user flathub --url="$SYS_URL"
     fi
     flatpak --user install flathub org.gnome.Platform//49 -y
     flatpak --user install com.github.Matoking.protontricks -y
